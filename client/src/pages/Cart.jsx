@@ -6,7 +6,8 @@ import Newsletter from '../components/Newsletter';
 import Footer from '../components/Footer';
 import { Add, Remove } from '@mui/icons-material';
 import { mobile } from "../responsive";
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
+import { addProduct, removeProduct } from '../redux/cartRedux';
 import StripeCheckout from 'react-stripe-checkout';
 import { userRequest } from '../requestMethods';
 import { Link, useHistory } from 'react-router-dom';
@@ -152,28 +153,40 @@ const Button = styled.button`
 
 
 const Cart = () => {
-    const [stripeToken,setStripeToken] = useState(null);
+    const [stripeToken, setStripeToken] = useState(null);
     const cart = useSelector(state=>state.cart);
+    const dispatch = useDispatch();
     const history = useHistory();
-    const onToken = (token)=>{
-        setStripeToken(token);
-    }
 
-
-    useEffect(()=>{
-        const makeRequest = async () =>{
-            try {
-                const res = await userRequest.post("/checkout/payment",{
-                    tokenId:stripeToken.id,
-                    amount:cart.total*100,
-                });
-                history.push("/success");
-            } catch (err) {
-                
+    const handleQuantityChange = (product, change) => {
+        if (change === "inc") {
+            dispatch(addProduct({ ...product, quantity: 1 }));
+        } else if (change === "dec") {
+            if (product.quantity > 1) {
+                dispatch(addProduct({ ...product, quantity: -1 }));
+            } else {
+                dispatch(removeProduct(product));
             }
         }
-       stripeToken && makeRequest();
-    },[stripeToken,cart.total,history]);
+    };
+    const onToken = async (token) => {
+        try {
+            const res = await userRequest.post("/checkout/payment", {
+                tokenId: token.id,
+                amount: cart.total * 100,
+                currency: "usd",
+                description: `Order total: $${cart.total}`
+            });
+            
+            if (res.data && res.data.id) {
+                alert("✅ Payment Successful!");
+                history.push("/success");
+            }
+        } catch (err) {
+            console.error("Payment Error:", err);
+            alert("❌ Payment failed. Please try again.");
+        }
+    };
 
     
   return (
@@ -207,50 +220,72 @@ const Cart = () => {
                </Top>
                <Bottom>
                 <Info>
-                    {cart.products.map((product)=>(
-                        <>
-                        <Product>
-                        <ProductDetail>
-                            <Image src= {product.img} />
-                            <Details>
-                                <ProductName><b>Product:</b>{product.title}</ProductName>
-                                <ProductId><b>Id:</b> {product._id}</ProductId>
-                                <ProductColor color={product.color}></ProductColor>
-                                <ProductSize><b>Size:</b> {product.size} </ProductSize>
-                            </Details>
-                        </ProductDetail>
-                        <PriceDetail>
-                            <ProductAmountContainer>
-                               <Add/>
-                               <ProductAmount>{product.quantity}</ProductAmount>
-                               <Remove/> 
-                            </ProductAmountContainer>
-                            <ProductPrice>Rs. {product.price*product.quantity}</ProductPrice>
-                        </PriceDetail>
-                    </Product>
-                    <Hr/>
-                    </>
-                 ))
-                    }
+                    {cart.products && cart.products.length > 0 ? (
+                        cart.products.filter(product => product !== null).map((product, index) => (
+                            <React.Fragment key={`${product?._id || index}-${index}`}>
+                                {product && (
+                                    <>
+                                        <Product>
+                                            <ProductDetail>
+                                                <Image 
+                                                    src={product.img || "https://via.placeholder.com/200"} 
+                                                    onError={(e) => {
+                                                        e.target.src = "https://via.placeholder.com/200";
+                                                    }}
+                                                />
+                                                <Details>
+                                                    <ProductName><b>Product: </b>{product.title || "Unknown Product"}</ProductName>
+                                                    <ProductId><b>Id: </b>{product._id || "N/A"}</ProductId>
+                                                    <ProductColor color={product.color || "#000000"}></ProductColor>
+                                                    <ProductSize><b>Size: </b>{product.size || "N/A"}</ProductSize>
+                                                </Details>
+                                            </ProductDetail>
+                                            <PriceDetail>
+                                                <ProductAmountContainer>
+                                                    <Add 
+                                                        style={{ cursor: 'pointer' }}
+                                                        onClick={() => handleQuantityChange(product, "inc")}
+                                                    />
+                                                    <ProductAmount>{product.quantity || 1}</ProductAmount>
+                                                    <Remove 
+                                                        style={{ cursor: 'pointer' }}
+                                                        onClick={() => handleQuantityChange(product, "dec")}
+                                                    />
+                                                </ProductAmountContainer>
+                                                <ProductPrice>
+                                                    Rs {(product.price || 0) * (product.quantity || 1)}
+                                                </ProductPrice>
+                                            </PriceDetail>
+                                        </Product>
+                                        <Hr/>
+                                    </>
+                                )}
+                            </React.Fragment>
+                        ))
+                    ) : (
+                        <div style={{ textAlign: 'center', padding: '20px' }}>
+                            Your cart is empty
+                        </div>
+                    )}
                 </Info>
                 <Summary>
                     <SummaryTitle>ORDER SUMMARY</SummaryTitle>
                     <SummaryItem>
                         <SummaryItemText>Subtotal :</SummaryItemText>
-                        <SummaryItemPrice>Rs. {cart.total}</SummaryItemPrice>
+                        <SummaryItemPrice>Rs {cart.total}</SummaryItemPrice>
                     </SummaryItem>
                     <SummaryItem>
                         <SummaryItemText>Estimated Shipping :</SummaryItemText>
-                        <SummaryItemPrice>Rs. 99</SummaryItemPrice>
+                        <SummaryItemPrice>Rs 90</SummaryItemPrice>
                     </SummaryItem>
                     <SummaryItem>
                         <SummaryItemText>Shipping Discount :</SummaryItemText>
-                        <SummaryItemPrice>Rs. -99</SummaryItemPrice>
+                        <SummaryItemPrice>-Rs 90</SummaryItemPrice>
                     </SummaryItem>
                     
                     <SummaryItem  type="total">
                         <SummaryItemText> Total</SummaryItemText>
-                        <SummaryItemPrice>Rs. {cart.total}</SummaryItemPrice>
+                        <SummaryItemPrice>Rs {cart.total}</SummaryItemPrice>
                     </SummaryItem>
                     <StripeCheckout
                     name="Laf1ame store"
@@ -260,7 +295,11 @@ const Cart = () => {
                     description={`Your total is Rs. ${cart.total}`}
                     amount={cart.total*100}
                     token={onToken}
-                    stripeKey={KEY} 
+                    currency="INR"
+                    locale="en"
+                    email=""
+                    allowRememberMe={true}
+                    stripeKey={KEY}
                     >
                     <Button>CHECKOUT NOW</Button>
                     </StripeCheckout>

@@ -37,13 +37,73 @@ const InfoContainer = styled.div`
 `;
 const Title = styled.h1`
     font-weight: 600;
+    margin-bottom: 20px;
 `;
 const Desc = styled.p`
     margin: 20px 0px;
+    line-height: 1.6;
+    color: #666;
 `;
-const Price = styled.span`
-    font-weight: 300;
-    font-size: 40px;
+const Price = styled.div`
+    font-weight: 600;
+    font-size: 32px;
+    color: #2c2c2c;
+    padding: 15px 0;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+
+    &::before {
+        content: "Rs";
+        font-size: 24px;
+        color: #666;
+    }
+`;
+
+const ProductFeatures = styled.div`
+    margin: 30px 0;
+    padding: 25px;
+    background-color: #f8f9fa;
+    border-radius: 12px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+`;
+
+const FeatureList = styled.ul`
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    gap: 15px;
+`;
+
+const FeatureItem = styled.li`
+    display: flex;
+    align-items: center;
+    font-size: 15px;
+    color: #4a4a4a;
+    padding: 8px 0;
+    border-bottom: 1px solid #eee;
+
+    strong {
+        color: #2c2c2c;
+        min-width: 120px;
+        margin-right: 10px;
+    }
+
+    &:last-child {
+        border-bottom: none;
+    }
+`;
+
+const Badge = styled.span`
+    display: inline-block;
+    padding: 4px 8px;
+    margin: 5px;
+    border-radius: 4px;
+    background-color: ${props => props.type === 'inStock' ? '#e8f5e9' : '#ffebee'};
+    color: ${props => props.type === 'inStock' ? '#2e7d32' : '#c62828'};
+    font-size: 14px;
+    font-weight: 500;
 `;
 const FilterContainer = styled.div`
     width: 50%;
@@ -63,12 +123,18 @@ const FilterTitle = styled.span`
 `;
 const FilterColor = styled.div`
     cursor: pointer;
-    width: 20px;
-    height: 20px;
-    border: solid aliceblue;
+    width: 30px;
+    height: 30px;
+    border: 2px solid ${props => props.selected ? 'teal' : '#ddd'};
     border-radius: 50%;
-    margin-right: 5px;
+    margin-right: 8px;
     background-color: ${props => props.color};
+    transition: transform 0.2s, border-color 0.2s;
+
+    &:hover {
+        transform: scale(1.1);
+        border-color: teal;
+    }
 `;
 const FilterSize = styled.select`
     cursor: pointer;
@@ -102,15 +168,22 @@ const Amount = styled.div`
 `;
 
 const Button = styled.button`
-    border: 2px solid teal;
-    background-color: white;
-    border-radius: 5px;
-    padding: 15px;
-    font-weight: 700;
-    color: teal;
+    border: none;
+    background-color: teal;
+    border-radius: 8px;
+    padding: 15px 30px;
+    font-weight: 600;
+    color: white;
     cursor: pointer;
-    &:hover{
-        background-color: aliceblue;
+    transition: all 0.3s ease;
+    
+    &:hover {
+        background-color: #006d6d;
+        transform: translateY(-2px);
+    }
+    
+    &:active {
+        transform: translateY(0);
     }
 `;
 const ShippingDetails = styled.div`
@@ -170,15 +243,49 @@ const Product = () => {
                 </ImgContainer>
                 <InfoContainer>
                     <Title>{product.title}</Title>
-                    <Desc>
-                        {product.desc}
-                    </Desc>
-                    <Price>₹ {product.price}</Price>
+                    <Badge type={product.inStock ? 'inStock' : 'outOfStock'}>
+                        {product.inStock ? 'In Stock' : 'Out of Stock'}
+                    </Badge>
+                    <Price>{product.price}</Price>
+                    <Desc>{product.desc}</Desc>
+                    
+                    <ProductFeatures>
+                        <FeatureList>
+                            {product.categories?.length > 0 && (
+                                <FeatureItem>
+                                    <strong>Category: </strong>
+                                    {product.categories.join(", ")}
+                                </FeatureItem>
+                            )}
+                            <FeatureItem>
+                                <strong>Product ID: </strong>
+                                {product._id}
+                            </FeatureItem>
+                            {product.size?.length > 0 && (
+                                <FeatureItem>
+                                    <strong>Available Sizes: </strong>
+                                    {product.size.join(", ")}
+                                </FeatureItem>
+                            )}
+                            {product.color?.length > 0 && (
+                                <FeatureItem>
+                                    <strong>Available Colors: </strong>
+                                    {product.color.join(", ")}
+                                </FeatureItem>
+                            )}
+                        </FeatureList>
+                    </ProductFeatures>
+
                     <FilterContainer>
                         <Filter>
                             <FilterTitle>Color</FilterTitle>
                             {product.color?.map((c) => (
-                                <FilterColor color={c} key={c} onClick={() => setColor(c)} />
+                                <FilterColor 
+                                    color={c} 
+                                    key={c} 
+                                    onClick={() => setColor(c)}
+                                    selected={color === c}
+                                />
                             ))}
                         </Filter>
                         <Filter>

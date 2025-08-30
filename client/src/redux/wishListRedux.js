@@ -3,19 +3,34 @@ import { createSlice } from "@reduxjs/toolkit";
 
 
 const wishListRedux = createSlice({
-    name: "wishlist",
+    name: "wishList",
     initialState: {
-        wishlist: [],
+        products: [],
         quantity: 0,
     },
     reducers: {
         addWishList: (state, action) => {
-            state.quantity += 1;
-            state.wishlist.push(action.payload);
+            const existingProduct = state.products.find(
+                item => item._id === action.payload._id
+            );
+            if (!existingProduct) {
+                state.quantity += 1;
+                state.products.push(action.payload);
+            }
+        },
+        removeFromWishList: (state, action) => {
+            state.products = state.products.filter(
+                item => item._id !== action.payload
+            );
+            state.quantity -= 1;
+        },
+        clearWishList: (state) => {
+            state.products = [];
+            state.quantity = 0;
         },
     }
 });
 
 
-export const { addWishList } = wishListRedux.actions;
+export const { addWishList, removeFromWishList, clearWishList } = wishListRedux.actions;
 export default wishListRedux.reducer;

@@ -58,13 +58,23 @@
   }
   
   .productInfoItem {
-    width: 150px;
+    width: 100%;
     display: flex;
-    justify-content: space-between;
+    justify-content: flex-start;
+    margin-bottom: 15px;
+    align-items: flex-start;
+  }
+  
+  .productInfoKey {
+    width: 120px;
+    font-weight: 600;
+    color: #555;
   }
   
   .productInfoValue {
-    font-weight: 300;
+    font-weight: 400;
+    color: #666;
+    flex: 1;
   }
   
   .productBottom {
@@ -89,15 +99,26 @@
     color: gray;
   }
   
-  .productFormLeft > input {
-    margin-bottom: 10px;
-    border: none;
-    padding: 5px;
-    border-bottom: 1px solid gray;
+  .productFormLeft > input,
+  .productFormLeft > textarea {
+    margin-bottom: 15px;
+    border: 1px solid #ddd;
+    padding: 8px;
+    border-radius: 4px;
+    font-size: 14px;
+  }
+
+  .productFormLeft > input:focus,
+  .productFormLeft > textarea:focus {
+    outline: none;
+    border-color: #666;
   }
   
-  .productFormLeft >select{
-    margin-bottom: 10px;
+  .productFormLeft > select {
+    margin-bottom: 15px;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
   }
   
   .productUploadImg{

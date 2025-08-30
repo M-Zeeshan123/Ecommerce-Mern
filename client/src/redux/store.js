@@ -22,7 +22,11 @@ const persistConfig = {
 };
 
 
-const rootReducer = combineReducers({ user: userReducer, cart: cartReducer,wishlist: wishlistReducer });
+const rootReducer = combineReducers({
+    user: userReducer,
+    cart: cartReducer,
+    wishList: wishlistReducer  // Changed from wishlist to wishList to match the slice name
+});
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);
 

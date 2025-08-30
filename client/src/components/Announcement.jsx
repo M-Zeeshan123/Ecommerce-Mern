@@ -13,7 +13,7 @@ const Container = styled.div`
 
 const Announcement = () => {
   return (
-    <Container>Extra 10% off on orders above ₹1999.</Container>
+    <Container>Extra 10% off on orders above Rs.1999</Container>
   )
 }
 

@@ -72,16 +72,60 @@ export default function Product() {
           </div>
           <div className="productInfoBottom">
             <div className="productInfoItem">
-              <span className="productInfoKey">id:</span>
+              <span className="productInfoKey">ID:</span>
               <span className="productInfoValue">{product._id}</span>
             </div>
             <div className="productInfoItem">
-              <span className="productInfoKey">sales:</span>
-              <span className="productInfoValue">5123</span>
+              <span className="productInfoKey">Price:</span>
+              <span className="productInfoValue">Rs. {product.price}</span>
             </div>
             <div className="productInfoItem">
-              <span className="productInfoKey">in stock:</span>
-              <span className="productInfoValue">{product.inStock}</span>
+              <span className="productInfoKey">Stock Status:</span>
+              <span className="productInfoValue" style={{ color: product.inStock ? 'green' : 'red' }}>
+                {product.inStock ? "In Stock" : "Out of Stock"}
+              </span>
+            </div>
+            <div className="productInfoItem">
+              <span className="productInfoKey">Categories:</span>
+              <span className="productInfoValue">
+                {product.categories?.join(", ") || "N/A"}
+              </span>
+            </div>
+            <div className="productInfoItem">
+              <span className="productInfoKey">Sizes:</span>
+              <span className="productInfoValue">
+                {Array.isArray(product.size) ? product.size.join(", ") : "N/A"}
+              </span>
+            </div>
+            <div className="productInfoItem">
+              <span className="productInfoKey">Colors:</span>
+              <span className="productInfoValue" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                {Array.isArray(product.color) ? (
+                  <>
+                    {product.color.join(", ")}
+                    <div style={{ display: 'flex', gap: '4px' }}>
+                      {product.color.map((color, index) => (
+                        <div
+                          key={index}
+                          style={{
+                            width: '20px',
+                            height: '20px',
+                            backgroundColor: color.toLowerCase(),
+                            border: '1px solid #ddd',
+                            borderRadius: '50%'
+                          }}
+                        />
+                      ))}
+                    </div>
+                  </>
+                ) : "N/A"}
+              </span>
+            </div>
+            <div className="productInfoItem">
+              <span className="productInfoKey">Description:</span>
+              <span className="productInfoValue" style={{ whiteSpace: 'pre-wrap' }}>
+                {product.desc || "No description available"}
+              </span>
             </div>
           </div>
         </div>
@@ -90,15 +134,44 @@ export default function Product() {
         <form className="productForm">
           <div className="productFormLeft">
             <label>Product Name</label>
-            <input type="text" placeholder={product.title} />
+            <input type="text" defaultValue={product.title} name="title" />
+            
             <label>Product Description</label>
-            <input type="text" placeholder={product.desc} />
-            <label>Price</label>
-            <input type="text" placeholder={product.price} />
-            <label>In Stock</label>
-            <select name="inStock" id="idStock">
-              <option value="true">Yes</option>
-              <option value="false">No</option>
+            <textarea 
+              rows="4" 
+              name="desc" 
+              defaultValue={product.desc}
+              style={{ padding: '8px', marginBottom: '10px', resize: 'vertical' }}
+            />
+            
+            <label>Price (Rs.)</label>
+            <input type="number" defaultValue={product.price} name="price" />
+            
+            <label>Categories (comma separated)</label>
+            <input 
+              type="text" 
+              defaultValue={product.categories?.join(", ")} 
+              name="categories"
+            />
+            
+            <label>Sizes (comma separated)</label>
+            <input 
+              type="text" 
+              defaultValue={Array.isArray(product.size) ? product.size.join(", ") : ""}
+              name="size"
+            />
+            
+            <label>Colors (comma separated)</label>
+            <input 
+              type="text" 
+              defaultValue={Array.isArray(product.color) ? product.color.join(", ") : ""}
+              name="color"
+            />
+            
+            <label>Stock Status</label>
+            <select name="inStock" id="idStock" defaultValue={product.inStock}>
+              <option value="true">In Stock</option>
+              <option value="false">Out of Stock</option>
             </select>
           </div>
           <div className="productFormRight">

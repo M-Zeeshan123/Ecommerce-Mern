@@ -54,26 +54,99 @@ const Button = styled.button`
 `;
 
 const Register = () => {
+  const [formData, setFormData] = React.useState({
+    username: "",
+    email: "",
+    password: "",
+    confirmPassword: ""
+  });
+  const [error, setError] = React.useState("");
+
+  const handleChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value
+    });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError("");
+
+    if (formData.password !== formData.confirmPassword) {
+      setError("Passwords do not match!");
+      return;
+    }
+
+    try {
+      const response = await fetch("http://localhost:5000/api/auth/register", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          username: formData.username,
+          email: formData.email,
+          password: formData.password,
+        }),
+      });
+
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.message || "Registration failed");
+      }
+
+      // Registration successful
+      alert("Registration successful! Please login.");
+      window.location.href = "/login";
+    } catch (err) {
+      setError(err.message || "Something went wrong!");
+    }
+  };
+
   return (
     <Container>
-        <Wrapper>
-            <Title>CREATE ACCOUNT</Title>
-            <Form>
-                <Input placeholder="first name"/>
-                <Input placeholder="last name"/>
-                <Input placeholder="username"/>
-                <Input placeholder="email"/>
-                <Input placeholder="password"/>
-                <Input placeholder="confirm password"/>
-                <Agreement>
-                    By creating an account, I consent to the processing of my personal
-                    data in accordance with the <b>PRIVACY POLICY</b>.
-                </Agreement>
-                <Button>CREATE</Button>
-            </Form>
-        </Wrapper>
+      <Wrapper>
+        <Title>CREATE ACCOUNT</Title>
+        <Form onSubmit={handleSubmit}>
+          <Input
+            name="username"
+            placeholder="username"
+            onChange={handleChange}
+            required
+          />
+          <Input
+            name="email"
+            type="email"
+            placeholder="email"
+            onChange={handleChange}
+            required
+          />
+          <Input
+            name="password"
+            type="password"
+            placeholder="password"
+            onChange={handleChange}
+            required
+          />
+          <Input
+            name="confirmPassword"
+            type="password"
+            placeholder="confirm password"
+            onChange={handleChange}
+            required
+          />
+          <Agreement>
+            By creating an account, I consent to the processing of my personal
+            data in accordance with the <b>PRIVACY POLICY</b>.
+          </Agreement>
+          {error && <span style={{ color: "red", margin: "10px 0" }}>{error}</span>}
+          <Button type="submit">CREATE</Button>
+        </Form>
+      </Wrapper>
     </Container>
-  )
+  );
 }
 
 export default Register

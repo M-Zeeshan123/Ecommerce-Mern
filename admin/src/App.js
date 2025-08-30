@@ -15,34 +15,67 @@ import List from "./pages/list/List";
 import NewList from "./pages/newList/NewList";
 
 function App() {
-  const admin =  JSON.parse(JSON.parse(localStorage.getItem("persist:root")).user)
-  .currentUser.isAdmin;
+  const admin = (() => {
+    try {
+      const persistRoot = localStorage.getItem("persist:root");
+      if (!persistRoot) return false;
+      
+      const user = JSON.parse(persistRoot).user;
+      if (!user) return false;
+      
+      const currentUser = JSON.parse(user).currentUser;
+      if (!currentUser) return false;
+
+      // Check both authentication and admin status
+      return currentUser.isAdmin === true && currentUser.accessToken;
+    } catch (error) {
+      console.error("Error checking admin status:", error);
+      return false;
+    }
+  })();
+
+  // Redirect to login if not authenticated
+  if (!admin && window.location.pathname !== "/login") {
+    return <Router><Redirect to="/login" /></Router>;
+  }
+
   return (
     <Router>
       <Switch>
-
-      {!admin && <Route path="/login">  <Login/>  </Route>}
-
-      { admin &&
-        <>
-       <Topbar/>
-       <div className="container">
-        <Sidebar/>
-        <Route path="/products">  <ProductList/>   </Route>
-        <Route exact path="/">  <Home/>   </Route>
-        <Route path="/product/:productId">  <Product/>   </Route>
-        <Route path="/newproduct">  <NewProduct/>   </Route>
-         <Route path="/users">  <UserList/>   </Route>
-        {/* <Route path="/user/:userId">  <User/>   </Route>
-        <Route path="/newUser">  <NewUser/>   </Route>
-        <Route path="/lists">  <ListList/>   </Route>
-        <Route path="/list/:listsId">  <List/>   </Route>
-      <Route path="/newList">  <NewList/>   </Route> */}
-      </div>
-      </>
-        }
+        <Route exact path="/login">
+          {admin ? <Redirect to="/" /> : <Login />}
+        </Route>
+        
+        {!admin ? (
+          <Redirect to="/login" />
+        ) : (
+          <>
+            <Topbar />
+            <div className="container">
+              <Sidebar />
+              <Switch>
+                <Route exact path="/">
+                  <Home />
+                </Route>
+                <Route exact path="/products">
+                  <ProductList />
+                </Route>
+                <Route exact path="/product/:productId">
+                  <Product />
+                </Route>
+                <Route exact path="/newproduct">
+                  <NewProduct />
+                </Route>
+                <Route exact path="/users">
+                  <UserList />
+                </Route>
+                <Redirect to="/" />
+              </Switch>
+            </div>
+          </>
+        )}
       </Switch>
-      </Router>
+    </Router>
   );
 }
 

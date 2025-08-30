@@ -14,20 +14,42 @@ const Title = styled.h2`
    margin-top: 50px;
 `;
 
+const ProductList = styled.div`
+    padding: 20px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+`;
+
+const EmptyMessage = styled.div`
+    text-align: center;
+    padding: 20px;
+    font-size: 20px;
+    color: #666;
+`;
+
 const WishList = () => {
+    const wishlist = useSelector(state => state?.wishList?.products || []);
     
-    const wishlist = useSelector(state=>state.wishList.wishlist);
-    
-    console.log(wishlist);
-  return (
-    
-    <Container>
-    <Navbar/>
-    <Title>YOUR WISHLIST</Title>
-    <Newsletter/>
-    <Footer/>
-    </Container>
-  )
+    return (
+        <Container>
+            <Navbar/>
+            <Title>YOUR WISHLIST</Title>
+            {wishlist && wishlist.length > 0 ? (
+                <ProductList>
+                    {wishlist.map((item) => (
+                        <Product item={item} key={item._id} />
+                    ))}
+                </ProductList>
+            ) : (
+                <EmptyMessage>
+                    Your wishlist is empty
+                </EmptyMessage>
+            )}
+            <Newsletter/>
+            <Footer/>
+        </Container>
+    )
 }
 
 export default WishList

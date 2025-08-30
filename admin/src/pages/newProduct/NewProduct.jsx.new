@@ -38,18 +38,8 @@ export default function NewProduct() {
             return;
         }
 
-        if (!inputs.title || !inputs.desc || !inputs.price || !inputs.size || !inputs.color) {
+        if (!inputs.title || !inputs.desc || !inputs.price) {
             setMessage({ type: "error", text: "Please fill in all required fields" });
-            return;
-        }
-
-        if (!Array.isArray(inputs.size) || inputs.size.length === 0) {
-            setMessage({ type: "error", text: "Please add at least one size" });
-            return;
-        }
-
-        if (!Array.isArray(inputs.color) || inputs.color.length === 0 || inputs.color.some(c => !c.trim())) {
-            setMessage({ type: "error", text: "Please add at least one color" });
             return;
         }
 
@@ -81,16 +71,17 @@ export default function NewProduct() {
                         };
                         
                         await addProduct(product, dispatch);
-                        setUploading(false); // Reset uploading state before redirect
                         setMessage({ type: "success", text: "Product added successfully!" });
-                        history.replace("/products");
+                        setTimeout(() => {
+                            history.push("/products");
+                        }, 2000);
                     } catch (err) {
                         setMessage({ 
                             type: "error", 
                             text: err.response?.data?.message || "Error adding product" 
                         });
-                        setUploading(false); // Reset uploading state on error
                     }
+                    setUploading(false);
                 }
             );
         } catch (error) {
@@ -161,38 +152,6 @@ export default function NewProduct() {
                         type="number"
                         placeholder="100"
                         onChange={handleChange}
-                        disabled={uploading}
-                        required
-                    />
-                </div>
-                <div className="addProductItem">
-                    <label>Size</label>
-                    <input
-                        name="size"
-                        type="text"
-                        placeholder="XS,S,M,L,XL (comma separated)"
-                        onChange={(e) => {
-                            setInputs(prev => ({
-                                ...prev,
-                                size: e.target.value.split(",").map(size => size.trim())
-                            }));
-                        }}
-                        disabled={uploading}
-                        required
-                    />
-                </div>
-                <div className="addProductItem">
-                    <label>Colors</label>
-                    <input
-                        name="color"
-                        type="text"
-                        placeholder="blue,red,black (comma separated)"
-                        onChange={(e) => {
-                            setInputs(prev => ({
-                                ...prev,
-                                color: e.target.value.split(",").map(color => color.trim())
-                            }));
-                        }}
                         disabled={uploading}
                         required
                     />
